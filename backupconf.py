@@ -118,8 +118,22 @@ if __name__ == "__main__":
         sys.exit()
 
 
-    #dest = "/tmp/test"
-    tmpdir = CONF["tmpdir"]
+    # Prepare dirs and names
+
+    instance = "backupconf_" + datetime.datetime.today().strftime("%Y%m%d_%H%M%S")
+    backupdir = CONF["backupdir"]
+    tmprootdir = CONF["tmpdir"]
+    # create a tmpdir for that RUN inside tmprootdir
+    tmpdir = tmprootdir + "/" + instance
+    
+    logit("instance  : " + instance)
+    logit("backupdir : " + backupdir)
+    logit("tmprootdir: " + tmprootdir)
+    logit("tmpdir: " + tmpdir)
+
+
+
+    # Main loop
 
     for pattern in CONF["paths"]:
         logit("Path: " + pattern)
@@ -145,8 +159,24 @@ if __name__ == "__main__":
 
 
     # tar, gzip 
+    archive_name = backupdir + "/" + instance
+    archive_mode = "gztar"   #tar
+    archive_extension = "tar.gz"
+    archive_file = archive_name + "." + archive_extension
+
+    shutil.make_archive(archive_name, archive_mode, tmpdir)
+    logit("Archive built : " + archive_name + " - mode " + archive_mode)
+    logit("Archive chmod : " + archive_file + " : 600")
+    os.chmod(archive_file, 0o600)
+
+    # TODO : crypt
+
+    # TODO : cleanup tmpdir
+    shutil.rmtree(tmpdir)
+    logit("tmpdir removed : " + tmpdir)
 
 
+    # cleanup older backups : number, or age
 
 
 
