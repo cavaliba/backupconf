@@ -2,7 +2,6 @@
 # backupconf.py
 # (c) cavaliba.com 2022
 
-
 # usage
 # python3 backupconf.py --conf myconf.yml
 
@@ -107,6 +106,8 @@ if __name__ == "__main__":
         print(VERSION)
         sys.exit()
 
+    # TODO : option for printing an empty config template
+
     logit("Starting backupconf...")
 
     configfile = ARGS["conf"]
@@ -120,6 +121,7 @@ if __name__ == "__main__":
 
     # Prepare dirs and names
 
+    # TODO : use prefix (e.g. for group/vm) from CONF, default to hostname
     instance = "backupconf_" + datetime.datetime.today().strftime("%Y%m%d_%H%M%S")
     backupdir = CONF["backupdir"]
     tmprootdir = CONF["tmpdir"]
@@ -143,6 +145,7 @@ if __name__ == "__main__":
             continue
 
 
+
         for item in glob.glob(pattern, recursive=True):
             srcpath = os.path.dirname(item)
             destpath = tmpdir + srcpath
@@ -150,13 +153,15 @@ if __name__ == "__main__":
             if ARGS['list']:
                 logit("  LIST - " + item)
             else:
+                # TODO : fail safe, test if exists, try/except
+
                 # create target dir if missing
                 os.makedirs(destpath, mode = 0o700, exist_ok = True) 
                 # copy: replace / overwrite if existing
                 shutil.copy(item, destpath, follow_symlinks=False)
                 logit("  COPIED - " + item)
 
-
+            # TODO count / stats / output
 
     # tar, gzip 
     archive_name = backupdir + "/" + instance
@@ -171,12 +176,14 @@ if __name__ == "__main__":
 
     # TODO : crypt
 
+    # TODO : copy to secondary locations
+
     # TODO : cleanup tmpdir
     shutil.rmtree(tmpdir)
     logit("tmpdir removed : " + tmpdir)
 
 
-    # cleanup older backups : number, or age
+    # cleanup older backups : number, or age or size
 
 
 
