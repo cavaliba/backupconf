@@ -14,7 +14,7 @@ import yaml
 # import time
 import datetime
 import signal
-# import json
+import json
 # import requests
 # import hashlib
 import argparse
@@ -98,8 +98,9 @@ def logit(line):
     print(now + ' : ' + line)
 
 def debug(*items):
+    now = datetime.datetime.today().strftime("%Y/%m/%d - %H:%M:%S")
     if ARGS['debug']:
-        print('DEBUG :', ' '.join(items))
+        print(now + ' : ' + 'DEBUG :', ' '.join(items))
 
 # -----------------
 def timeout_handler(signum, frame):
@@ -144,14 +145,15 @@ def parse_arguments(myargs):
     parser.add_argument('--list', '-l', help='list identified files, no backup',
                         action='store_true', required=False)
 
-    parser.add_argument('--template', help='print a conf template',
+    parser.add_argument('--showconf', help='print the configuration and exit',
                         action='store_true', required=False)
 
+    parser.add_argument('--template', help='print a configuration template and exit',
+                        action='store_true', required=False)
 
     r = parser.parse_args(myargs)
     return vars(r)
     
-   
 
 # ------------
 # Main entry
@@ -174,43 +176,49 @@ if __name__ == "__main__":
         print(VERSION)
         sys.exit()
 
-    # TODO : option for printing an empty config template
+    # print an empty config template
     if ARGS["template"]:
         print(TEMPLATE_CONF)
         sys.exit()
 
-
-
-
-    logit("-" * 80)
-    logit("Starting backupconf...")
-
     configfile = ARGS["conf"]
     try:
         CONF = conf_load_file(configfile)
-        logit("config file loaded : " + configfile)
     except:        
         print("Could not load config file " + configfile)
         sys.exit()
+
+    # print an empty config template
+    if ARGS["showconf"]:
+        print(yaml.dump(CONF))
+        sys.exit()
+
+    logit("-" * 80)
+    logit("Starting backupconf...")
+    logit("config file loaded : " + configfile)
 
 
     # Prepare dirs and names
 
     backupprefix = CONF.get("prefix", socket.gethostname())
     backupprefix += "_"
+    logit("prefix    : " + backupprefix)
+
+
     instance = backupprefix + datetime.datetime.today().strftime("%Y%m%d_%H%M%S")
+    logit("instance  : " + instance)
+
     backupdir = CONF["backupdir"]
+    logit("backupdir : " + backupdir)
+
     tmprootdir = CONF["tmpdir"]
+    if not os.path.isdir(tmprootdir):
+        print("FATAL : tmpdir missing : " + tmprootdir)
+        sys.exit(0) 
+    logit("tmprootdir: " + tmprootdir)
+
     # create a tmpdir for that RUN inside tmprootdir
     tmpdir = tmprootdir + "/" + instance
-    
-    logit("prefix    : " + backupprefix)
-    logit("instance  : " + instance)
-    logit("backupdir : " + backupdir)
-    logit("tmprootdir: " + tmprootdir)
-    logit("tmpdir: " + tmpdir)
-
-    # create tmpdir 
     if not ARGS['list']:
         try:
             os.makedirs(tmpdir, mode = 0o700, exist_ok = True) 
@@ -231,7 +239,7 @@ if __name__ == "__main__":
     # LOOP over patterns in CONF
     for pattern in CONF["paths"]:
 
-        logit("Path: " + pattern)
+        debug("Starting with PATH: " + pattern)
 
         if pattern[0] != "/":
             logit("  ERROR - Not an absolute PATH (should start with a /)")
@@ -246,7 +254,6 @@ if __name__ == "__main__":
 
             srcpath = os.path.dirname(item)
             destpath = tmpdir + srcpath
-            debug("---")
             debug("item : " + item)
             debug("srcpath : " + srcpath)
             debug("destpath : " + destpath)
@@ -283,7 +290,7 @@ if __name__ == "__main__":
                     logit("ERROR - failed to copy " + item + " to " + destpath + " - " + str(e) )
                     continue
                 
-                logit("  COPIED - " + item + " to " + destpath)
+                debug("copy - " + item + " to " + destpath)
 
         # stat/count by pattern
         if item_count_pattern > 0:
@@ -291,9 +298,9 @@ if __name__ == "__main__":
             if ARGS['list']:
                 logit("  " + str(item_count_pattern) + " items found")
             else:
-                logit("  " + str(item_count_pattern) + " items copied")
+                logit(pattern + " - " + str(item_count_pattern) + " items copied")
         else:
-            logit("  SKIPPED - Nothing / not found")
+            logit(pattern + " skipped - nothing to do")
             skip_count += 1
 
 
