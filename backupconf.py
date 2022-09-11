@@ -4,14 +4,6 @@
 # usage
 # python3 backupconf.py --conf myconf.yml
 
-# TODO-2 : crypt / GPG support
-# TODO-2 : copy to secondary locations
-# TODO-2 : compute duration
-# TODO-2 : display archive size
-# TODO-2 : prepare/send cmt event
-# TODO-2  : add a maxitem / maxsize CONF parameter
-# TODO-2 : rotate / cleanup older backups : number, or age or size
-
 
 import os
 import sys

@@ -3,15 +3,16 @@ backupconf - cavaliba.com
 
 (c) cavaliba.com 2020-2022  - Version 1.1 - 2022/09/11
 
-Simple backup tool for Linux / OS and related config files.
+Simple backup tool for Linux OS, middleware and apps config files.
 
 
 Setup
 
-    * download in /opt/backupconf/
-    * virtualenv, prerequisite (pyinstaller binaries soon)
-    * create a simple config : python3 backupconf.py --template > /opt/backupconf/conf.yml
-    * customize
+    * download python code from GIT in /opt/backupconf/ ; virtualenv, prerequisite 
+    * or download binary from https://www.cavaliba.com/download/backupconf/
+    * and copy to /usr/local/bin/backupconf (chown root: , chmod 755)
+    * init a simple config : python3 backupconf.py --template > /opt/backupconf/conf.yml
+    * customize, chmod 600 /opt/backupconf/conf.yml
     * create /tmp/backupconftmp  (workdir)
     * create /var/backupconf/    (backups / archives)
     * chmod  / chown 600 to protect sensitive files and backups
@@ -22,8 +23,15 @@ Setup
 
 
 
-Standard config
+Security
 
+    * system wides backups are to be run as root or equiv. privileges if access is needed to root only files
+    * conf.yml (/opt/backupconf/conf.yml) must be kept as a root read/write only file
+    * workdir (/tmp/backupconf) must be root/700 only
+    * backupdir (/var/backupconf) must be root/700 only
+
+
+Standard config conf.yml
 
         ---
         # cavaliba.com / backupconf / conf.yml
